@@ -1,0 +1,494 @@
+\section{Implementation of Modular Exponentiation}
+\begin{frame}{\VideoName}
+    \tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}{Modular exponentiation}
+    \begin{itemize}
+        \item To implement RSA or RSA signatures, we need to compute $a^d\mo n$ for some integer $a\in \ZZ_n$, \item $n=pq$ is a product of two distinct primes and $d\in\ZZ_{\varphi(n)}^*$.
+        \item We can compute $d-1$ modular multiplications.
+         \begin{itemize}
+             \item inefficient for large $d$
+             \item impossible for practical values of $d$ -- bit length more than $1000$
+         \end{itemize}
+         \item Square and multiply algorithm
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Square and multiply algorithm}
+    \begin{itemize}
+        \item Let $n\geq2$ be an integer, $d\in\ZZ_{\varphi(n)}$, $a\in\ZZ_n$
+        \item Binary representation of $d=d_{\ell_d-1}\dots d_2d_1d_0$, where $d_i=0,1$ and
+\[
+d=\sum_{i=0}^{\ell_d-1}d_i2^i.
+\]
+\item We have
+\[
+a^d=a^{\sum_{i=0}^{\ell_d-1}d_i2^i}=\prod_{i=0}^{\ell_d-1}(a^{2^i})^{d_i}=\prod_{0\leq i<\ell_d,d_i=1}a^{2^i}.
+\]
+\item Thus, to compute $a^d\mo n$, we can 
+\begin{itemize}
+    \item First compute $a^{2^i}$ for $0\leq i<\ell_d$
+    \item Then $a^d$ is a product of $a^{2^i}$ for which $d_i=1$
+\end{itemize}
+\item Compared to $d-1$ modular multiplications, this requires at most $2\log_2 d$ multiplications
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Square and multiply algorithm}
+    \begin{algorithm}[H]
+\KwIn{$n,\ a,\ d$\tcp{$n\in\ZZ, n\geq2$; $a\in\ZZ_n$; $d\in\ZZ_{\varphi(n)}$ has bit length $\ell_d$}}
+\KwOut{$a^d\mo n$}
+result $= 1$, $t = a$\\
+	\For{$i=0$, $i<\ell_d$, $i++$}
+ 	{
+ 	\tcp{$i$th bit of $d$ is $1$}
+  		\If{$d_i=1$}{
+            \tcp{mutiply by $a^{2^i}$}
+  		$\text{result} = \text{result}*t\mo n$\tcp{$
+a^d=\displaystyle\prod_{0\leq i<\ell_d,d_i=1}a^{2^i}$}
+  		}
+  		\tcp{$t=a^{2^{i+1}}$}
+  		$t=t*t\mo n$\\
+  	}
+  	\Return result\\
+	\caption{Right-to-left square and multiply algorithm for computing modular exponentiation}
+\end{algorithm}
+\end{frame}
+
+
+\begin{frame}{Right-to-left square and multiply algorithm}
+\begin{columns}[T] % align columns
+\begin{column}{.4\textwidth}
+{
+\setlength{\interspacetitleruled}{0pt}%
+\setlength{\algotitleheightrule}{0pt}%
+\begin{algorithm}[H]
+result $= 1$, $t = a$\\
+	\For{$i=0$, $i<\ell_d$, $i++$}
+ 	{
+ 	\tcp{$i$th bit of $d$ is $1$}
+  		\If{$d_i=1$}{
+            \tcp{mutiply by $a^{2^i}$}
+  		$\text{result} = \text{result}*t\mo n$\\
+  		}
+  		\tcp{$t=a^{2^{i+1}}$}
+  		$t=t*t\mo n$\\
+  	}
+  	\Return result
+\end{algorithm}
+}
+\end{column}%
+\hfill%
+\begin{column}{.6\textwidth}
+\begin{example}
+    Let $n=15,\ d=3=11_2,\  a=2$.
+    Then
+    \[
+    a^d\mo n=2^3\mo15=8\mo15=8
+    \]
+ \begin{center}
+        \begin{tabular}{c|c|c|c}
+     $i$ & $d_i$  &  $t$  & result\\\hline
+     $0$ & $1$    &  $4$  &  $2$ \\
+     $1$ & $1$    &  $1$  &  $8$
+    \end{tabular}
+    \end{center}
+\end{example}
+\end{column}%
+\end{columns}
+\end{frame}
+
+\begin{frame}{Right-to-left square and multiply algorithm}
+\begin{columns}[T] % align columns
+\begin{column}{.4\textwidth}
+{
+\setlength{\interspacetitleruled}{0pt}%
+\setlength{\algotitleheightrule}{0pt}%
+\begin{algorithm}[H]
+result $= 1$, $t = a$\\
+	\For{$i=0$, $i<\ell_d$, $i++$}
+ 	{
+ 	\tcp{$i$th bit of $d$ is $1$}
+  		\If{$d_i=1$}{
+            \tcp{mutiply by $a^{2^i}$}
+  		$\text{result} = \text{result}*t\mo n$\\
+  		}
+  		\tcp{$t=a^{2^{i+1}}$}
+  		$t=t*t\mo n$\\
+  	}
+  	\Return result
+\end{algorithm}
+}
+\end{column}%
+\hfill%
+\begin{column}{.6\textwidth}
+\begin{example}
+    Let $n=23,\ d=4=100_2,\  a=5$.
+    Then 
+    \[
+    a^d\mo n=5^4\mo23=625\mo23=4
+    \]
+ \begin{center}
+        \begin{tabular}{c|c|c|c}
+     $i$ & $d_i$  &  $t$  & result\\\hline
+     $0$ & $0$    &  $2$  &  $1$ \\
+     $1$ & $0$    &  $4$  &  $1$ \\
+     $2$ & $1$    &  $16$  &  $4$ \\
+    \end{tabular}
+    \end{center}
+\end{example}
+\end{column}%
+\end{columns}
+\end{frame}
+
+\begin{frame}{Left-to-right square and multiply algorithm}
+    \begin{algorithm}[H]
+\KwIn{$n,\ a,\ d$\tcp{$n\in\ZZ, n\geq2$; $a\in\ZZ_n$; $d\in\ZZ_{\varphi(n)}$}}
+\KwOut{$a^d\mo n$}
+$t = 1$\\
+	\For{$i=\ell_d-1$, $i\geq0$, $i--$}
+ 	{
+  	$t=t*t\mo n$\\
+ 	\tcp{$i$th bit of $d$ is $1$}
+  		\If{$d_i=1$}{
+  		$t = a*t\mo n$
+  		}
+  	}
+  	\Return t
+\caption{Left-to-right square and multiply algorithm for computing modular exponentiation.}
+\end{algorithm}
+\end{frame}
+
+\begin{frame}{Left-to-right square and multiply algorithm}
+\begin{columns}[T] % align columns
+\begin{column}{.4\textwidth}
+{
+\setlength{\interspacetitleruled}{0pt}%
+\setlength{\algotitleheightrule}{0pt}%
+\begin{algorithm}[H]
+$t = 1$\\
+	\For{$i=\ell_d-1$, $i\geq0$, $i--$}
+ 	{
+  	$t=t*t\mo n$\\
+ 	\tcp{$i$th bit of $d$ is $1$}
+  		\If{$d_i=1$}{
+  		$t = a*t\mo n$
+  		}
+  	}
+  	\Return t
+\end{algorithm}
+}
+\end{column}%
+\hfill%
+\begin{column}{.6\textwidth}
+\begin{example}
+    Let $n=15,\ d=3=11_2,\  a=2$.
+    Then
+    \[
+    a^d\mo n=2^3\mo15=8\mo15=8
+    \]
+ \begin{center}
+        \begin{tabular}{c|c|c}
+     $i$ & $d_i$  &  $t$  \\\hline
+     $1$ & $1$    &  $2$  \\
+     $0$ & $1$    &  $8$  
+    \end{tabular}
+    \end{center}
+\end{example}
+\end{column}%
+\end{columns}
+\end{frame}
+
+\section{Implementations of Modular Multiplication}
+\begin{frame}{\VideoName}
+    \tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}{Modular operations}
+    \begin{itemize}
+        \item To have more efficient modular exponentiation implementations, we need to compute modular addition, subtraction, inverse, and multiplications.
+        \item For modular addition and subtraction, we can just compute the corresponding integer operation and then perform a single reduction modulo the modulus.
+        \item For inverse modulo an integer, we can utilize the extended Euclidean algorithm.
+        \item We will look at one method for computing modular multiplication
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Notations}
+    \begin{itemize}
+        \item $n$: an integer of bit length $\ell_n$, 
+\begin{equation*}
+    2^{\ell_n-1}\leq n<2^{\ell_n}.
+\end{equation*}
+        \item $a, b\in\ZZ_n$, in particular, $0\leq a,b<n$.
+       \item $\omega$: the computer's word size
+       \begin{itemize}
+           \item for a 64-bit processor, the \textit{word size} is 64
+       \end{itemize}
+       \item Let $\kappa=\lceil \ell_n/\omega\rceil$, i.e. $(\kappa-1)\omega<\ell_n\leq \kappa\omega$.
+      \item Then ($||$ indicates concatenation, $0\leq a_i< 2^{\omega}$)
+\[
+a=a_{\kappa-1}||a_{\kappa-2}||\dots||a_0,
+\]
+      \item Note that some $a_i$ might be $0$ if the bit length of $a$ is less than $\ell_n$. We have
+\begin{equation*}
+a=\sum_{i=0}^{\kappa-1}a_i(2^\omega)^i.
+\end{equation*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Notations}
+     \begin{itemize}
+        \item $n$: an integer of bit length $\ell_n$
+        \item $a, b\in\ZZ_n$, in particular, $0\leq a,b<n$.
+       \item $\omega$: the computer's word size
+       \item Let $\kappa=\lceil \ell_n/\omega\rceil$, i.e. $(\kappa-1)\omega<\ell_n\leq \kappa\omega$.
+      \item Then ($||$ indicates concatenation, $0\leq a_i< 2^{\omega}$)
+\[
+a=a_{\kappa-1}||a_{\kappa-2}||\dots||a_0,
+\]
+      \item Note that some $a_i$ might be $0$ if the bit length of $a$ is less than $\ell_n$. We have
+\begin{equation*}
+a=\sum_{i=0}^{\kappa-1}a_i(2^\omega)^i.
+\end{equation*}
+    \end{itemize}
+\begin{example}
+    $\omega=2$,  $a=13=1101_2$, $n=15$.
+    Then
+    \[
+    \ell_n= 4,\quad
+    \kappa=\lceil \ell_n/\omega\rceil=\lceil 4/2\rceil=2.
+    \]
+\end{example}
+\end{frame}
+
+\begin{frame}{Notations -- Example}
+     \begin{itemize}
+        \item $n$: an integer of bit length $\ell_n$ 
+        \item $a, b\in\ZZ_n$, in particular, $0\leq a,b<n$.
+       \item Let $\kappa=\lceil \ell_n/\omega\rceil$
+      \item Then ($||$ indicates concatenation, $0\leq a_i< 2^{\omega}$)
+\[
+a=a_{\kappa-1}||a_{\kappa-2}||\dots||a_0,
+\]
+      \item Note that some $a_i$ might be $0$ if the bit length of $a$ is less than $\ell_n$. We have
+\begin{equation*}
+a=\sum_{i=0}^{\kappa-1}a_i(2^\omega)^i.
+\end{equation*}
+    \end{itemize}
+\begin{example}
+    $\omega=2$,  $a=13=1101_2$, $n=15$.
+    Then $\ell_n=4$, $\kappa=2$.
+    \[
+    a_0=01_2=1,\quad a_1=11_2=3,\quad a=a_0(2^\omega)^0+a_1(2^{\omega})^1=1+3\times4=13
+    \]
+\end{example}
+\end{frame}
+
+
+\begin{frame}{Notations -- Example}
+     \begin{itemize}
+        \item $n$: an integer of bit length $\ell_n$, i.e. 
+        \item $a, b\in\ZZ_n$, in particular, $0\leq a,b<n$.
+       \item Let $\kappa=\lceil \ell_n/\omega\rceil$
+      \item Then ($||$ indicates concatenation, $0\leq a_i< 2^{\omega}$)
+\[
+a=a_{\kappa-1}||a_{\kappa-2}||\dots||a_0,
+\]
+      \item Note that some $a_i$ might be $0$ if the bit length of $a$ is less than $\ell_n$. We have
+\begin{equation*}
+a=\sum_{i=0}^{\kappa-1}a_i(2^\omega)^i.
+\end{equation*}
+    \end{itemize}
+\begin{example}
+   $a=55=110111_2$, $n=69$, $\omega=2$.
+$
+  \ell_n=7,\ \kappa=\lceil \ell_n/\omega\rceil=\lceil7/2\rceil=4.
+$
+  \[
+    a_0=11=3,\quad a_1=01=1,\quad a_2=11=3,\quad a_3=0.
+    \]
+    \[
+    a=3\times(2^2)^0+1\times(2^2)^1+3\times(2^2)^2+0\times(2^2)^3=3+4+48+0=55.
+    \]
+\end{example}
+\end{frame}
+
+
+\begin{frame}{Blakley's method}
+\begin{itemize}
+\item We would like to compute
+\[
+R:=ab\mo n,\quad a,b\in\ZZ_n.
+\]
+\item We have discussed that
+\begin{equation*}
+a=\sum_{i=0}^{\kappa-1}a_i(2^\omega)^i,
+\end{equation*}
+where $0\leq a_i< 2^{\omega}$.
+ \item The product $ab$ can be computed as follows
+\end{itemize}
+\[
+t=ab=\left(\sum_{i=0}^{\kappa-1} a_i(2^\omega)^i\right)b=\sum_{i=0}^{\kappa-1}(2^\omega)^ia_ib,
+\]
+\end{frame}
+
+\begin{frame}{}
+    \begin{algorithm}[H]
+\KwIn{$n,\ a,\ b$\tcp{$n\in\ZZ, n\geq2$ has bit length $\ell_n$; $a,b\in\ZZ_n$}}
+\KwOut{$R=ab\mo n$}
+$R=0$\\
+\tcp{$\kappa=\lceil \ell_n/\omega\rceil$, where $\omega$ is the word size of the computer}
+	\For{$i=\kappa-1$, $i\geq0$, $i--$}
+ 	{
+ 	$R=2^{\omega}R+a_ib$\\
+        $R=R\mo n$
+  	}
+  	\Return $R$
+	\caption{Blakely's method for computing modular multiplication.}
+\end{algorithm}
+\end{frame}
+
+\begin{frame}{Blakely's method}
+\begin{columns}[T] % align columns
+\begin{column}{.4\textwidth}
+{
+\setlength{\interspacetitleruled}{0pt}%
+\setlength{\algotitleheightrule}{0pt}%
+\begin{algorithm}[H]
+	\KwIn{$n,\ a,\ b$}
+\KwOut{$R=ab\mo n$}
+$R=0$\\
+	\For{$i=\kappa-1$, $i\geq0$, $i--$}
+ 	{
+ 	$R=2^{\omega}R+a_ib$\\
+        $R=R\mo n$
+  	}
+  	\Return $R$
+\end{algorithm}
+}
+\end{column}%
+\hfill%
+\begin{column}{.6\textwidth}
+Line~3,
+\[
+R\leq 2^{\omega}(n-1)+(2^{\omega}-1)(n-1)=(2^{\omega+1}-1)n-(2^{\omega+1}-1)<(2^{\omega+1}-1)n.
+\]
+Line~4 can be replaced by comparing $R$ with $n$ for $2^{\omega+1}-2$ times and subtract $n$ from $R$ in case $R\geq n$:
+{
+\setlength{\interspacetitleruled}{0pt}%
+\setlength{\algotitleheightrule}{0pt}%
+\begin{algorithm}[H]
+\DontPrintSemicolon
+	\For{$j=0,1,2\dots,2^{\omega+1}-2$}{
+ \lIf{$R\geq n$}{
+ $R=R-n$
+ }
+ \lElse{break}
+    }
+\end{algorithm}
+}
+in this way, we can avoid dividing by $n$
+\end{column}%
+\end{columns}
+\end{frame}
+
+\begin{frame}{Blakely's method -- Example}
+\begin{columns}[T] % align columns
+\begin{column}{.4\textwidth}
+{
+\setlength{\interspacetitleruled}{0pt}%
+\setlength{\algotitleheightrule}{0pt}%
+\begin{algorithm}[H]
+	\KwIn{$n,\ a,\ b$}
+\KwOut{$R=ab\mo n$}
+$R=0$\\
+	\For{$i=\kappa-1$, $i\geq0$, $i--$}
+ 	{
+ 	$R=2^{\omega}R+a_ib$\\
+        $R=R\mo n$
+  	}
+  	\Return $R$
+\end{algorithm}
+}
+\end{column}%
+\hfill%
+\begin{column}{.6\textwidth}
+\begin{example}
+    $\omega=2$,  $a=13=1101_2$, $b=5$, $n=15$ ($\ell_n=4$), $\kappa=2$.
+    \[
+    a_0=01_2=1,\quad a_1=11_2=3.
+    \]
+    For $i=1$,
+    \[
+    R=0+3\times5\mo 15=0\mo 15.
+    \]
+    For $i=0$, 
+    \[
+    R=0+1\times5\mo15=5\mo15
+    \]
+    We have the final result $13\times5\mo15=5$.
+\end{example}
+\end{column}%
+\end{columns}
+\end{frame}
+
+
+\begin{frame}{Blakely's method -- Example}
+\begin{columns}[T] % align columns
+\begin{column}{.4\textwidth}
+{
+\setlength{\interspacetitleruled}{0pt}%
+\setlength{\algotitleheightrule}{0pt}%
+\begin{algorithm}[H]
+	\KwIn{$n,\ a,\ b$}
+\KwOut{$R=ab\mo n$}
+$R=0$\\
+	\For{$i=\kappa-1$, $i\geq0$, $i--$}
+ 	{
+ 	$R=2^{\omega}R+a_ib$\\
+        $R=R\mo n$
+  	}
+  	\Return $R$
+\end{algorithm}
+}
+\end{column}%
+\hfill%
+\begin{column}{.6\textwidth}
+\begin{example}
+   $a=55=110111_2$, $b=46$, $n=69$, $\omega=2$, $\ell_n=7$, $\kappa=4$, $
+    a_0=11=3$, $a_1=01=1$, $a_2=11=3$, $a_3=0$
+    \begin{eqnarray*}
+        i=3\quad & \text{ line~3,} & R=0,\\
+         & \text{ line~4,} & R=0,\\
+        i=2\quad & \text{ line~3,} & R=3\times46=138,\\
+         & \text{ line~4,} & R=138\mo69=0,\\
+        i=1 \quad& \text{ line~3,} & R=1\times46=46,\\
+         & \text{ line~4,} & R=46\mo69=46,\\
+         i=0 \quad& \text{ line~3,} & R=2^2\times46+3\times46=322,\\
+         & \text{ line~4,} & R=322\mo69=46.
+    \end{eqnarray*}
+\end{example}
+\end{column}%
+\end{columns}
+\end{frame}
+
+\begin{frame}{Final remarks}
+    \begin{itemize}
+        \item Currently, a few hundred qubits (a quantum counterpart to the classical bit) are possible for a quantum computer
+        \item To break RSA, thousands of qubits are required
+        \item Post-quantum public key cryptosystems are being proposed to protect communications after a sufficiently strong quantum computer is built
+        \item Various public key cryptosystems based on different problems
+        \item Various digital signature designs
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Section summary}
+    \begin{itemize}
+        \item Classical ciphers, e.g. shift cipher
+        \item Modern ciphers: DES, AES, PRESENT
+        \item Implementation of symmetric block ciphers - T-tables for AES, combining sBoxLayer and pLayer for PRESENT
+        \item RSA, RSA signatures
+        \item Implementation of RSA - square and multiply algorithm, Blakely's method
+    \end{itemize}
+\end{frame}

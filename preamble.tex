@@ -1,0 +1,140 @@
+
+
+\mode<presentation>
+{
+\setbeamercolor{section in head/foot}{use=structure,bg=structure.fg!25!bg}
+
+\useinnertheme{rounded}
+\setbeamertemplate{frametitle}[default][center]
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{itemize items}[circle]
+
+\setbeamercolor{block title}{use=structure,fg=structure.fg,bg=structure.fg!8!bg}
+\setbeamercolor{block title alerted}{use=alerted text,fg=alerted text.fg,bg=alerted text.fg!10!bg}
+\setbeamercolor{block title example}{use=example text,fg=example text.fg,bg=example text.fg!05!bg}
+
+\setbeamercolor{block body}{parent=normal text,use=block title,bg=structure.fg!8!bg}
+\setbeamercolor{block body alerted}{parent=normal text,use=block title alerted,bg=block title alerted.bg!20!bg}
+\setbeamercolor{block body example}{parent=normal text,use=block title example,bg=example text.fg!05!bg}
+
+%change beamer button color
+\setbeamercolor{button}{bg=white,fg=green}
+\usefonttheme{professionalfonts}
+
+%table of contents
+\setbeamertemplate{section in toc}{\hspace{1.2em}{\color{blue}{$\bullet$}}~\inserttocsection\par}
+}
+
+%%%%change proof block color
+\addtobeamertemplate{proof begin}{%
+    \setbeamercolor{block title}{fg=orange!60!white,bg=orange!10!white}%
+    \setbeamercolor{block body}{fg=black, bg=orange!10!white}%
+}{}
+
+\addtobeamertemplate{qed symbol}{%
+    \color{orange!60!white}%
+}
+
+% All the usepackage will come here. No usepackage later.
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage[mathcal]{euscript}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17} 
+\usepackage{mathtools}
+\let\algorithm\relax
+\let\endalgorithm\relax
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\newcommand\mycommfont[1]{\footnotesize\ttfamily\textcolor{gray}{#1}}
+\SetCommentSty{mycommfont}
+\let\oldnl\nl% Store \nl in \oldnl
+\newcommand{\nonl}{\renewcommand{\nl}{\let\nl\oldnl}}% To remove line number for one line
+\usepackage{braket}%%for defining set
+\usepackage{subcaption}%for subtables
+\usepackage{multirow}%for multirows
+\usepackage{adjustbox}
+\usepackage{slashbox}%%for backslash in tables
+\usepackage{xspace}%for space after macro
+\usepackage{soul} % for crossing out text
+
+%%url line break
+\makeatletter
+\g@addto@macro{\UrlBreaks}{\UrlOrds}
+\makeatother
+
+%------reset footnote number for each slide
+\AtBeginEnvironment{frame}{\setcounter{footnote}{0}}
+
+%%for long division---
+\usepackage{longdivision}
+\usepackage{scalerel}
+\setcounter{MaxMatrixCols}{20}
+\newcommand{\longdiv}{\smash{\mkern-0.43mu\vstretch{1.31}{\hstretch{.7}{)}}\mkern-5.2mu\vstretch{1.31}{\hstretch{.7}{)}}}}
+%%----
+
+%--------------------New functions---------
+
+\def \NN {{\mathbb N}}
+\def \CC {{\mathbb C}}
+\def \RR {{\mathbb R}}
+\def \QQ {{\mathbb Q}}
+\def \H {{\mathbb H}}
+\def \FF {{\mathbb F}}
+\def \ZZ {{\mathbb Z}}
+\def \a {{\mathfrak a}}
+\def \b {{\mathfrak b}}
+\def \p {{\mathfrak p}}
+\def \Pf {{\mathfrak P}}
+
+\def \tta {{\texttt A}}
+\def \ttb {{\texttt B}}
+\def \ttc {{\texttt C}}
+\def \ttd {{\texttt D}}
+\def \ttf {{\texttt F}}
+\def \m {{\mathfrak m}}
+
+\DeclareMathOperator*{\argmax}{arg\,max}%%define argmax
+\DeclareMathOperator*{\argmin}{arg\,min}%%define argmin
+
+\newcommand{\mo}{\textrm{~mod~}}
+\newcommand{\ord}[1]{\textrm{ord}(#1)}
+\newcommand{\node}[2]{``\texttt{#1} \ (#2)\textnormal{''}}
+\newcommand{\picsrc}[1]{\text{{\tiny src: \url{#1}}}}
+\newcommand{\cov}[1]{\textrm{Cov}{\left(#1\right)}}
+\newcommand{\var}[1]{\textrm{Var}{\left(#1\right)}}
+\newcommand{\ex}[1]{\textrm{E}\left[#1\right]}
+\newcommand{\wt}[1]{\textrm{wt}\left(#1\right)}
+\newcommand{\dis}[1]{\textrm{dis}\left(#1\right)}
+
+%-----------------Datasets--------------
+\newcommand{\datafixone}{\textit{Fixed dataset A}\xspace}
+\newcommand{\datafixtwo}{\textit{Fixed dataset B}\xspace}
+\newcommand{\dataranone}{\textit{Random plaintext dataset}\xspace}
+\newcommand{\datarantwo}{\textit{Random dataset}\xspace}
+
+%--------------------End of New Functions----
+
+\setbeamertemplate{footline}[frame number]
+
+%change beamer button color
+\setbeamercolor{button}{bg=white,fg=green}
+
+% ----------------------------------------------
+
+\title{{\Huge \SectionName} \texorpdfstring{\\ \vspace{1cm} {\normalsize SECTION \SectionNumber}}{}}
+
+% \author{Jakub Breier\texorpdfstring{\\TTControl \vspace{1cm}\\}{}Xiaolu Hou\texorpdfstring{\\ Slovak University of Technology}{}}
+\date{}
+
+\AtBeginSubsection[] {
+  \begin{frame}<beamer>
+    \frametitle{Outline}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+
+

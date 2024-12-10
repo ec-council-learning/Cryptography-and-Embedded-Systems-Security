@@ -1,0 +1,151 @@
+\begin{frame}{Timing side-channel attacks}
+    \begin{itemize}
+        \item Timing attacks exploit variations in execution time or other timing-related behaviors to infer sensitive information
+        \item Each logical operation within a computer requires time to execute, and this execution time can vary depending on the input data and the type of operation.
+        \item A timing attack capitalizes on this variability by meticulously measuring the time it takes for the target operation
+        \item The extent of information leakage depends on various factors, including system design, CPU architecture, and implementation details
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Source of timing leakage}
+    \begin{itemize}
+        \item The time variability can come from many sources.
+        \item For example, CPUs cache data, leading to data-dependent timing variations.
+        \item Software running on CPUs with data caches exhibits timing differences due to memory lookups into the cache.
+        \item Furthermore, modern CPUs speculatively execute past conditional jumps by guessing.
+        \begin{itemize}
+            \item Incorrect guesses (common with secret data) result in measurable delays as the CPU backtracks.
+        \end{itemize}
+        \item As another example, certain mathematical operations exhibit varied execution times depending on the CPU hardware.
+        \begin{itemize}
+            \item For instance, integer division is almost always non-constant time due to microcode loops.
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{First timing attack}
+    \begin{itemize}
+        \item In 1996, Paul Kocher\footnote{Kocher, Paul C. "Timing attacks on implementations of Diffie-Hellman, RSA, DSS, and other systems." Advances in Cryptology—CRYPTO’96: 16th Annual International Cryptology Conference Santa Barbara, California, USA August 18–22, 1996 Proceedings 16. Springer Berlin Heidelberg, 1996.} introduced the concept of timing attacks as a method to exploit cryptographic implementations.
+        \item These attacks involve meticulously measuring the time required to perform private key operations.
+        \item Kocher’s seminal work demonstrated successful timing attacks against various building blocks commonly used in asymmetric cryptography, including modular exponentiation and Montgomery reduction in RSA implementations.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Countermeasures against timing attacks}
+    \begin{itemize}
+        \item Constant-time implementation\footnote{Käsper, Emilia, and Peter Schwabe. "Faster and timing-attack resistant AES-GCM." In International Workshop on Cryptographic Hardware and Embedded Systems, pp. 1-17. Berlin, Heidelberg: Springer Berlin Heidelberg, 2009.}
+        \item Random delays\footnote{Osvik, Dag Arne, Adi Shamir, and Eran Tromer. "Cache attacks and countermeasures: the case of AES." In Topics in Cryptology–CT-RSA 2006: The Cryptographers’ Track at the RSA Conference 2006, San Jose, CA, USA, February 13-17, 2005. Proceedings, pp. 1-20. Springer Berlin Heidelberg, 2006.}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Cache side-channel attacks}
+    \begin{itemize}
+        \item Commonly, there are two types of cache attacks: access-based and timing-based.
+        \item In access-based cache attacks, the attacker observes their own cache channel by measuring cache access times.
+        \begin{itemize}
+            \item Then by analyzing these access times, the attacker can infer information about the victim’s data or operations.
+        \end{itemize}
+        \item For timing-based cache attacks, the attacker monitors the victim’s cache hits and misses.
+        \begin{itemize}
+            \item By analyzing these patterns, the attacker deduces information about the victim’s memory access times
+        \end{itemize}
+    \end{itemize}
+\vfill
+{\small Zhang, T., \& Lee, R. B. (2014). Secure cache modeling for measuring side-channel leakage. Technical Report, Princeton University.}
+\end{frame}
+
+\begin{frame}{Countermeasures against cache attacks}
+    \begin{itemize}
+    \item Isolation-based
+    \begin{itemize}
+        \item Ensures that the attacker no longer shares the cache with the victim, making external interference-related attacks challenging
+        \item Achieving isolation can involve splitting the cache into zones related to individual processes.
+        \item Hardware virtualization is one approach to achieve this partitioning.
+        \item The partitioning can be either static (fixed at system startup) or dynamic (adjusted during runtime).
+    \end{itemize}
+    \item Randomization-based
+    \begin{itemize}
+        \item Random cache eviction or random cache permutation.
+        \item These techniques introduce randomness into cache behavior, making it harder for attackers to exploit timing-based cache attacks
+    \end{itemize}
+    \end{itemize}
+    \vfill
+    {\small Fournaris, A. P., Pocero Fraile, L., \& Koufopavlou, O. (2017). Exploiting hardware vulnerabilities to attack embedded system devices: A survey of potent microarchitectural attacks. Electronics, 6(3), 52.}
+\end{frame}
+
+\begin{frame}{Hardware Trojans}
+    \begin{itemize}
+        \item Malicious modifications of hardware during design or fabrication
+        \item Can alter the functional behavior of an integrated circuit (IC), potentially leading to catastrophic outcomes in safety-critical applications.
+        \item Can also be engineered to facilitate software-based attacks, such as privilege escalation, backdoor access, and password theft.\footnote{King, S. T., Tucek, J. A., Cozzie, A., Grier, C., Jiang, W., \& Zhou, Y. (2008). Designing and Implementing Malicious Hardware. Leet, 8, 1-8.}
+        \item Or intentionally induce physical side-channels to convey secret information.\footnote{Lin, L., Kasper, M., Güneysu, T., Paar, C., \& Burleson, W. (2009). Trojan side-channels: Lightweight hardware trojans through side-channel engineering. In Cryptographic Hardware and Embedded Systems-CHES 2009: 11th International Workshop Lausanne, Switzerland, September 6-9, 2009 Proceedings (pp. 382-395). Springer Berlin Heidelberg.}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Trigger mechanisms}
+    \begin{itemize}
+        \item The most common trigger mechanisms for Hardware Trojans can be categorized into two types: digital and analog. 
+        \item Digitally triggered Trojans are further divided into combinational and sequential types.
+        \begin{itemize}
+            \item Combinational Trojans: An adversary selects an extremely rare activation condition, making it highly unlikely for the Trojan to be triggered during standard manufacturing tests.
+            \item Sequential Trojans: Also known as ``time bombs,'' these are activated by the occurrence of a specific sequence or a period of continuous operation.
+            \item Analog Trojans: These utilize on-chip sensors to trigger a malfunction.
+        \end{itemize}
+    \end{itemize}
+\vfill
+{\small Chakraborty, R. S., Narasimhan, S., \& Bhunia, S. (2009, November). Hardware Trojan: Threats and emerging solutions. In 2009 IEEE International high level design validation and test workshop (pp. 166-171). IEEE.}
+\end{frame}
+
+\begin{frame}{Hardware Trojan Detection}
+    \begin{itemize}
+        \item Destructive Methods
+        \begin{itemize}
+            \item De-Metallization: Apply Chemical Mechanical Polishing (CMP) to a sample of manufactured ICs.
+            \item Analysis: Perform Scanning Electron Microscope (SEM) imaging and reconstruction to detect anomalies.
+        \end{itemize}
+        \item Non-Destructive Methods
+        \begin{itemize}
+            \item Non-Invasive Techniques: assess IC behavior against a reference (golden) IC or functional model.
+            \begin{itemize}
+                \item Run-Time: Implement online systems to detect unusual activity during field operation.
+                \item Test-Time: Identify Trojan-infected ICs before deployment through targeted testing.
+            \end{itemize}
+            \item Invasive
+            \begin{itemize}
+                \item Prevention: Focus on preventing Trojan insertion during the IC design and fabrication phases.
+                \item Post-Manufacturing Testing: Detect inserted Trojans through rigorous post-manufacturing examinations.
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+\vfill
+{\small Chakraborty, R. S., Narasimhan, S., \& Bhunia, S. (2009, November). Hardware Trojan: Threats and emerging solutions. In 2009 IEEE International high level design validation and test workshop (pp. 166-171). IEEE.}
+\end{frame}
+
+\begin{frame}{Cold boot attacks}
+    \begin{itemize}
+        \item Although a target system may utilize full disk encryption, cold boot attacks can still recover unencrypted data from RAM. 
+        \item Cold boot attacks exploit the remanence effect of RAM, which means that memory contents persist temporarily even after power is lost and gradually fade over time. 
+        \item Cold temperatures further reduce the rate at which bits decay in RAM.
+        \item  This residual data can be retrieved by either rebooting the system or by transferring the RAM modules to a separate analysis system that reads the remaining data.
+    \end{itemize}
+    \vfill
+    {\small Gruhn, M., \& Müller, T. (2013, September). On the practicability of cold boot attacks. In 2013 International Conference on Availability, Reliability and Security (pp. 390-397). IEEE.}
+\end{frame}
+
+\begin{frame}{Remanence effect}
+    \begin{itemize}
+        \item Gutmann's research on data remanence in semiconductor devices\footnote{Gutmann, P. (2001). Data remanence in semiconductor devices. In 10th USENIX Security Symposium (USENIX Security 01)} elucidates why DRAM exhibits the remanence effect. \item A DRAM chip comprises multiple DRAM cells, each storing a single bit of information.
+        \item Each cell includes a capacitor, whose voltage is compared to that of a reference cell. 
+        \item The reference cell maintains a voltage midway between fully charged and fully discharged states. 
+        \item If the voltage of a given cell exceeds the reference voltage, the cell represents a binary one; if it falls below, the cell represents a binary zero (or vice versa, depending on the active-low design). \item Since the voltage of capacitors decays exponentially rather than disappearing instantaneously, bits can be retained for a brief period even after power is lost.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{First practical attack}
+    \begin{itemize}
+        \item Halderman, J. A., Schoen, S. D., Heninger, N., Clarkson, W., Paul, W., Calandrino, J. A., ... \& Felten, E. W. (2009). Lest we remember: cold-boot attacks on encryption keys. Communications of the ACM, 52(5), 91-98.
+        \item The experiments demonstrated that DRAM retains data for several minutes even at room temperature, and this retention time is significantly extended at lower temperatures, such as those achieved with liquid nitrogen cooling.
+        \item The paper reported successful recovery of encryption keys from the memory dumps of several systems.
+        \item Potential countermeasures include measures to discard or obscure encryption keys before an adversary gains physical access, prevent memory extraction software from running on the machine, enhance physical protection of DRAM chips, and accelerate the decay of memory contents.
+    \end{itemize}
+\end{frame}

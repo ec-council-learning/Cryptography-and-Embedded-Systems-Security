@@ -1,0 +1,271 @@
+\begin{frame}{Introduction}
+    \begin{itemize}
+        \item In the last video, we discussed a safe error attack on RSA signatures
+        \item The attack can also be applied to RSA decryption
+        \item In this video, we will discuss a simple countermeasure against the attack
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Attack on a simple algorithm}
+\begin{columns}[T] % align columns
+\begin{column}{.4\textwidth}
+{
+\setlength{\interspacetitleruled}{0pt}%
+\setlength{\algotitleheightrule}{0pt}%
+\begin{algorithm}[H]
+\KwIn{$n,\ a,\ b,\ c$}
+\KwOut{$ab\mo n$ if $c=1$ and $a$ otherwise}
+\If{$c=1$}{
+$R=0$\\
+	\For{$i=\kappa-1$, $i>=0$, $i--$
+ \label{line:alg:farsaexblakely:loop}
+ }
+ 	{
+ 	$R=2^\omega R+a_ib$\\
+ 	$R=R\mo n$\\
+  	}
+  	$a=R$\\
+  }
+  	\Return $a$
+\end{algorithm}
+}
+\end{column}%
+\hfill%
+\begin{column}{.6\textwidth}
+ \begin{itemize}
+        \item Attacker has the knowledge of the correct output for a pair of $a$ and $b$.
+       \item Can rerun the algorithm with the same input, inject fault, and observe the output.
+        \item Suppose $c=1$ and a fault is injected during the loop starting from line~\ref{line:alg:farsaexblakely:loop} in the register containing $a_{i_0}$ when $i<i_0$ -- the fault in $a_{i_0}$ will not affect the output since $a_{i_0}$ is used when $i$ is equal to $i_0$.
+       \item If $c=0$ and a fault is injected in the register containing $a_{i_0}$ during the computation, then the final result will be faulty since the faulty value in $a$ will be returned.
+    \end{itemize}
+\end{column}%
+\end{columns}
+\end{frame}
+
+
+\begin{frame}{Attack on a simple algorithm}
+    \begin{columns}[T] % align columns
+\begin{column}{.42\textwidth}
+{
+\setlength{\interspacetitleruled}{0pt}%
+\setlength{\algotitleheightrule}{0pt}%
+\begin{algorithm}[H]
+\KwIn{$n,\ a,\ b,\ c$}
+\KwOut{$ab\mo n$ if $c=1$ and $a$ otherwise}
+\If{$c=1$}{
+$R=0$\\
+	\For{$i=\kappa-1$, $i>=0$, $i--$}
+ 	{
+ 	$R=2^\omega R+a_ib$\\
+ 	$R=R\mo n$\\
+  	}
+  	$a=R$\\
+  }
+  	\Return $a$
+\end{algorithm}
+}
+\end{column}%
+\hfill%
+\begin{column}{.63\textwidth}
+ \begin{itemize}
+        \item Attacker knows: correct output, $a$, $b$.
+        \item If $c=1$ and a fault is injected during the loop starting from line~\ref{line:alg:farsaexblakely:loop} in the register containing $a_{i_0}$ when $i<i_0$ -- output will not be affected
+       \item If $c=0$, output will be faulty
+       \item Now, if the attacker does not know the value of $c$ and would like to recover it by fault injection attacks.
+       \item Assume that $c=1$ and the loop in line~\ref{line:alg:farsaexblakely:loop} is executed.
+        \item Injects fault in $a_{i_0}$ at the time when $i$ is less than $i_0$.
+       \item Compares the output with the correct one and recovers the value of $c$ -- if the output is correct, $c=1$; otherwise $c=0$.
+    \end{itemize}
+\end{column}%
+\end{columns}
+\end{frame}
+
+\begin{frame}{Countermeasure for the simple algorithm}
+\begin{columns}[T] % align columns
+\begin{column}{.48\textwidth}
+{
+\setlength{\interspacetitleruled}{0pt}%
+\setlength{\algotitleheightrule}{0pt}%
+\begin{algorithm}[H]
+\KwIn{$n,\ a,\ b,\ c$}
+\KwOut{$ab\mo n$ if $c=1$ and $a$ otherwise}
+$R=0$\\
+\If{$c=1$}{
+	\For{$i=\kappa-1$, $i>=0$, $i--$
+ \label{line:alg:farsaexblakely:loop}
+ }
+ 	{
+ 	$R=2^\omega R+a_ib$\\
+ 	$R=R\mo n$\\
+  	}
+  	$a=R$\\
+  }
+  	\Return $a$
+\end{algorithm}
+}
+\end{column}%
+\hfill%
+\begin{column}{.55\textwidth}
+\begin{algorithm}[H]
+\KwIn{$n,\ a,\ b,\ c$\tcp{$a,b\in\ZZ_n$; $c=0,1$}}
+\KwOut{$ab\mo n$ if $c=1$ and $a$ otherwise}
+$R=0$\\
+\If{$c=1$}{
+	\For{$i=\kappa-1$, $i>=0$, $i--$
+ }
+ 	{
+ 	$R=2^\omega R+b_ia$\\
+ 	$R=R\mo n$\\
+  	}
+  	$a=R$\\
+  }
+  	\Return $a$
+\caption{Modified algorithm.}
+\end{algorithm}
+Will the output be faulty if the fault is injected
+\begin{itemize}
+    \item in $b_{i_0}$ when $i<i_0$ and $c=1$
+    \item in $b$ and $c=0$ 
+    \item in $a$
+\end{itemize}
+\end{column}%
+\end{columns}
+\end{frame}
+
+\begin{frame}{Countermeasure for the simple algorithm}
+\begin{columns}[T] % align columns
+\begin{column}{.45\textwidth}
+{
+\setlength{\interspacetitleruled}{0pt}%
+\setlength{\algotitleheightrule}{0pt}%
+\begin{algorithm}[H]
+\KwIn{$n,\ a,\ b,\ c$\tcp{$a,b\in\ZZ_n$; $c=0,1$}}
+\KwOut{$ab\mo n$ if $c=1$ and $a$ otherwise}
+$R=0$\\
+\If{$c=1$}{
+	\For{$i=\kappa-1$, $i>=0$, $i--$
+ }
+ 	{
+ 	$R=2^\omega R+b_ia$\\
+ 	$R=R\mo n$\\
+  	}
+  	$a=R$\\
+  }
+  	\Return $a$
+\end{algorithm}}
+\end{column}%
+\hfill%
+\begin{column}{.55\textwidth}
+\begin{itemize}
+    \item $c=1$ and the fault is in $b_{i_0}$ when $i<i_0$ -- since $b_{i_0}$ is used before the fault happens, the final result will not be affected.
+    \item $c=0$, a fault in $b_{i_0}$ at any time will not change the final output.
+     \item If a fault is injected in $a$, the output will be faulty no matter what value $c$ takes.
+\end{itemize}
+\end{column}%
+\end{columns}
+\end{frame}
+
+\begin{frame}{Safe error attack on RSA Signatures}
+\begin{columns}[T] % align columns
+\begin{column}{.45\textwidth}
+{\small
+{
+\setlength{\interspacetitleruled}{0pt}%
+\setlength{\algotitleheightrule}{0pt}%
+    \begin{algorithm}[H]
+$s= 1,\quad$
+$t = m$\\
+	\For{$i=0$, $i<\ell_d$, $i++$}
+ 	{
+  		\If{$d_i=1$}{
+            $R=0$\\
+            \For{$j=\kappa-1$, $j\geq0$, $j--$}{
+            $R=2^\omega R+s_jt$\\
+            $R=R\mo n$
+            }
+            $s=R$
+  		}
+            $R=0$\\
+            \For{$j=\kappa-1$, $j\geq0$, $j--$}{
+            $R=2^\omega R+t_jt$\\
+            $R=R\mo n$
+            }
+            $t=R$\\
+  	}
+  	\Return $s$\\
+\end{algorithm}}}
+\end{column}%
+\hfill%
+\begin{column}{.58\textwidth}
+\begin{itemize}
+        \item Suppose $d_i=1$ and a fault is injected during the $i$th iteration of the outer loop and at the time when $j<j_0$ during the loop starting from line~5, in the register containing $s_{j_0}$ -- correct output 
+       \item If $d_i=0$ and a fault is injected during the $i$th iteration of the outer loop in the register containing $s_{j_0}$ -- faulty output
+       \item Similarly to the attack on the simple algorithm, the attacker first assumes $d_i=1$, and injects fault in $s_{j_0}$ at the time corresponding to $j<j_0$.
+\item If the final result is not changed, the attacker can conclude that $d_i=1$, otherwise, $d_i=0$.
+    \end{itemize}
+\end{column}%
+\end{columns}
+\end{frame}
+
+\begin{frame}{Countermeasure for RSA Signatures}
+\begin{columns}[T] % align columns
+\begin{column}{.5\textwidth}
+Input: $n,m,d$
+{\small
+{
+\setlength{\interspacetitleruled}{0pt}%
+\setlength{\algotitleheightrule}{0pt}%
+    \begin{algorithm}[H]
+$s= 1,\quad$
+$t = m$\\
+	\For{$i=0$, $i<\ell_d$, $i++$}
+ 	{
+  		\If{$d_i=1$}{
+            $R=0$\\
+            \For{$j=\kappa-1$, $j\geq0$, $j--$}{
+            \textcolor{red}{$R=2^\omega R+s_jt$}\\
+            $R=R\mo n$
+            }
+            $s=R$
+  		}
+            $R=0$\\
+            \For{$j=\kappa-1$, $j\geq0$, $j--$}{
+            $R=2^\omega R+t_jt$\\
+            $R=R\mo n$
+            }
+            $t=R$\\
+  	}
+  	\Return $s$\\
+\end{algorithm}}}
+\end{column}%
+\hfill%
+\begin{column}{.5\textwidth}
+Output: $m^d\mo n$.
+{\small
+{
+\setlength{\interspacetitleruled}{0pt}%
+\setlength{\algotitleheightrule}{0pt}%
+\begin{algorithm}[H]
+$s= 1,\quad t = m$\\
+	\For{$i=0$, $i<\ell_d$, $i++$}
+ 	{
+  		\If{$d_i=1$}{
+            $R=0$\\
+            \For{$j=\kappa-1$, $j\geq0$, $j--$}{
+            \textcolor{red}{$R=2^\omega R+t_js$}\\
+            $R=R\mo n$
+            }
+            $s=R$\\
+  		}
+            $R=0$\\
+            \For{$j=\kappa-1$, $j\geq0$, $j--$}{
+            $R=2^\omega R+t_jt$\\
+            $R=R\mo n$
+            }
+            $t=R$\\
+  	}
+  	\Return $s$
+\end{algorithm}}}
+\end{column}%
+\end{columns}
+\end{frame}

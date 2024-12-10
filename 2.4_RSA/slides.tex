@@ -1,0 +1,295 @@
+\section{Introduction}
+\begin{frame}{\VideoName}
+    \tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}{Key exchange}
+    \begin{itemize}
+        \item For symmetric key ciphers, a prior communication of the master key (\textit{key exchange}) is required before any ciphertext is transmitted.
+        \item With only a symmetric key cipher, the key exchange may be difficult to achieve due to, e.g. far distance, and too many parties involved.
+        \item In practice, this is where asymmetric key cryptosystem comes into use.
+        \item For example, Alice would like to communicate with Bob using AES.
+        \begin{itemize}
+            \item To exchange the master key, $k$, for AES, she will encrypt $k$ by a public key cryptosystem using Bob's public key $e$, $c=E_e(k)$.
+            \item The resulting ciphertext $c$ will be sent to Bob, and Bob can decrypt it with his secret private key $d$, $k=D_d(c)$.
+            \item Then Alice and Bob can communicate with key $k$ using AES.
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Security of public key cryptosystem}
+    \begin{itemize}
+        \item Clearly, we require that it is computationally infeasible to find the private key $d$ given the public key $e$.
+         \item In practice, this is guaranteed by some intractable problem
+         \begin{itemize}
+             \item A problem is intractable if there does not exist an efficient algorithm to solve it.
+         \end{itemize}
+        \item However, the cipher might not be secure in the future.
+        \begin{itemize}
+            \item For example, if a quantum computer with enough bits is manufactured, it can break many public key cryptosystems
+        \end{itemize}
+       \item A public key cipher is not perfectly secure 
+       \begin{itemize}
+           \item perfectly secure: if an attacker only has a collection ciphertexts, they cannot obtain any information about the plaintext no matter how much computing power they have
+           \item however, the attacker can brute force the key
+       \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Greatest common divisor}
+\begin{definition}
+Take $m,n\in\ZZ$, $m\neq 0$ or $n\neq 0$, the \textit{greatest common divisor} of $m$ and $n$, denoted $\gcd (m,n)$, is given by $d\in\ZZ$ such that
+    \begin{itemize}
+        \item $d>0$,
+        \item $d|m$, $d|n$, and
+        \item if $c|m$ and $c|n$, then $c|d$.
+\end{itemize}
+\end{definition}
+\begin{example}
+\begin{itemize}
+    \item All positive divisors of $4$ and $6$ are $1,2,4$ and $1,2,3,6$ respectively.
+So $\gcd(4,6)=2$.
+\item All the positive divisors of $2$ are $1$ and $2$.
+All the positive divisors of $3$ are $1$ and $3$.
+So $\gcd(2,3)=1$.
+\end{itemize}
+\end{example}
+\end{frame}
+
+\begin{frame}{Prime numbers}
+    \begin{definition}
+\begin{itemize}
+    \item For $m,n\in\ZZ$ such that $m\neq0$ or $n\neq0$, $m$ and $n$ are said to be \textit{relatively prime}/\textit{coprime} if $\gcd(m,n)=1$.
+    \item Given $p\in\ZZ$, $p>1$.
+    $p$ is said to be \textit{prime} (or a \textit{prime number}) if for any $m\in\ZZ$, either $m$ is a multiple of $p$ (i.e. $p|m$) or $m$ and $p$ are coprime (i.e. $\gcd(p,m)=1$).
+\end{itemize}
+\end{definition}
+\begin{example}
+\begin{itemize}
+    \item $4$ and $9$ are relatively prime
+    \item $8$ and $6$ are not relatively prime
+    \item $2,3,5,7$ are prime numbers
+    \item $6,9,21$ are not prime numbers
+\end{itemize}
+\end{example}
+\end{frame}
+
+\begin{frame}{Addition and multiplication in $\ZZ_n$}
+\begin{itemize}
+    \item Take $n>1$ an integer
+    \item Take $\ZZ_n=\{0,1,\dots,n-1\}$, the set of remainders when dividing by $n$
+    \item We define addition and multiplication in $\ZZ_n$ to be addition and multiplication \textit{modulo $n$}, i.e. computing the remainder of the sum/product dividing by $n$
+\end{itemize}
+\begin{example}
+    \begin{itemize}
+        \item Let $n=7$. $\ZZ_7=\{0,1,2,3,4,5,6\}$
+        \[
+        2+6\mo7=8\mo7=1,\quad 2\times6\mo7=12\mo7=5
+        \]
+        \item Let $n=5$, $\ZZ_5=\{0,1,2,3,4\}$
+        \[
+        2+4\mo5=6\mo5=1,\quad 2\times4\mo5=8\mo5=3
+        \]
+    \end{itemize}
+\end{example}
+\end{frame}
+
+\begin{frame}{$\ZZ_n^*$}
+\begin{definition}
+\[
+\ZZ_n^*:=\Set{a\ |\ a\in\ZZ_n,\ \gcd(a,n)=1}.
+\]
+Let $\varphi(n)$ denote the cardinality of $\ZZ_n^*$, i.e. number of elements in $\ZZ_n^*$
+\[
+\varphi(n)=\lvert \ZZ_n^*\rvert.
+\]
+$\varphi$ is called the \textit{Euler's totient function}.
+\end{definition}
+\begin{example}
+    \begin{itemize}
+        \item Let $n=3$, $\ZZ_3^*=\Set{1,2}$, $\varphi(3)=2$.
+        \item Let $n=4$, $\ZZ_4^*=\Set{1,3}$, $\varphi(4)=2$.
+        \item Let $n=p$ be a prime number, $\ZZ_p^*=\ZZ_p-\Set{0}=\Set{1,2,\dots,p-1}$, $\varphi(p)=p-1$.
+    \end{itemize}
+    \end{example}
+\end{frame}
+
+\section{RSA}
+\begin{frame}{\VideoName}
+    \tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}{RSA}
+    \begin{itemize}
+        \item Published in 1977
+        \item Named after its inventors Ron Rivest, Adi Shamir, and Leonard Adleman.
+      \item RSA is the first public key cryptosystem, and still in use today.
+       % \item The security relies on the difficulty of finding the factorization of a composite positive integer.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Definition}
+\begin{definition}[RSA]
+Let $n=pq$, where $p,q$ are distinct prime numbers.
+Let $\mathcal{P}=\mathcal{C}=\ZZ_n$, $\mathcal{K}=\ZZ_{\varphi(n)}^*-\Set{1}$.
+For any $e\in \mathcal{K}$, define encryption
+\[
+    E_e:\ZZ_n\to\ZZ_n,\quad m\mapsto m^e\mo n,
+\]
+and the corresponding decryption
+\[
+    D_d:\ZZ_n\to\ZZ_n,\quad c\mapsto c^d\mo n,
+\]
+where $de\mo\varphi(n)=1$.
+The cryptosystem $(\mathcal{P},\mathcal{C},\mathcal{K},\mathcal{E},\mathcal{D})$, where $\mathcal{E}=\Set{E_e:e\in\mathcal{K}}$, $\mathcal{D}=\Set{D_d:d\in\mathcal{K}}$, is called \textit{RSA}.
+\end{definition}
+\begin{itemize}
+    \item $\varphi(n)=(p-1)(q-1)$
+    \item Public key: $n,e$, RSA modulus, encryption exponent
+    \item Private key: $d$, decryption exponent
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Key generation}
+    \begin{itemize}
+        \item Generate randomly and independently two large prime numbers $p$ and $q$.
+         \item Compute $n=pq$.
+         \begin{itemize}
+             \item Normally $p$ and $q$ are supposed to have equal lengths.
+             \item For example, take $p$ and $q$ to be 512-bit primes, and $n$ will be a 1024-bit modulus.
+         \end{itemize}
+          \item Choose $e\in\ZZ_{\varphi(n)}^*$
+          \begin{itemize}
+              \item Note that $e$ is odd since $\varphi(n)$ is even
+              \item In practice, $e$ is chosen to be small to make the encryption efficient.
+              \item However, $e$ cannot be too small. It has been shown that only the $n/4$ least significant bits of $d$ suffice to recover $d$ in the case of a small $e$
+        \end{itemize}
+      \item Compute $d$ using \textit{extended Euclidean algorithm}
+     \begin{itemize}
+         \item $d$ cannot be too small, it was proven that if $d<n^{0.292}$, then RSA can be broken
+     \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{RSA -- Example}
+\begin{example}
+\begin{itemize}
+    \item As a toy example, suppose Bob would like to generate his private and public keys for RSA.
+    \item Bob randomly generates $p=3$ and $q=5$.
+    \item Then he computes $n=15$ and 
+\[
+\varphi(n)=2\times4=8.
+\]
+\[
+\ZZ_{\varphi(n)}^*=\Set{1,3,5,7}
+\]
+\item From $\ZZ_{8}^*$, Bob chooses $e=3$.
+\item Then by the extended Euclidean algorithm, he computes $d=3$.
+We can check that
+\[
+de\mo8=3\times3\mo 8=1.
+\]
+\end{itemize}
+\end{example}
+\end{frame}
+
+\begin{frame}{RSA -- Example}
+\begin{example}
+\[
+p=3,\quad q=5,\quad n=15,\quad \varphi(n)=2\times4=8,\quad e=3,\quad d=3.
+\]
+\begin{itemize}
+    \item Suppose Alice would like to send plaintext $m=2$ to Bob, using Bob's public key $n=15,e=3$.
+    \item Alice computes 
+\[
+c=m^e\mo n=2^3\mo15=8.
+\]
+\item After receiving the ciphertext $c$ from Alice, Bob computes the plaintext using his private key 
+\[
+m=c^d\mo n=8^3\mo15=512\mo15=2.
+\]
+\end{itemize}
+\end{example}
+\end{frame}
+
+\begin{frame}{Security of RSA}
+    \begin{itemize}
+        \item If $p$ or $q$ is known to the attacker
+        \begin{itemize}
+            \item can factorize $n$ and compute $\varphi(n)$
+            \item with $e$, $d$ can be computed using the extended Euclidean algorithm 
+        \end{itemize}
+        \item All $p,q,\varphi(n)$ should be kept secret
+        \item Of course, if the attacker can factorize $n$ with an efficient algorithm, then RSA is broken.
+        \begin{itemize}
+            \item Up to now, the best-known algorithm for integer factorization has been used to factorize RSA modulus of bit length $768$
+            \item In practice, the most commonly used RSA modulus $n$ is 1024, 2048, or 4096 bit.
+            \item On the other hand, there is no proof that factorizing an integer $n$ is infeasible.
+        \end{itemize}
+         \item It is not proven that RSA is secure if factoring is computationally infeasible -- there might be other ways to attack RSA.
+    \end{itemize}
+\end{frame}
+
+\section{RSA Signatures}
+\begin{frame}{\VideoName}
+    \tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}{Digital signatures}
+    \begin{itemize}
+        \item Digital signatures provide means for an entity to bind its identity to a message. 
+        \item This normally means that the sender uses their private key to sign the (hashed) message. 
+        \item Whoever has access to the public key can then verify the origin of the message.
+        \item For example, the message can be electronic contracts or electronic bank transactions.
+        \item Suppose Alice signs a message $m$ with a private key $d$ and generates signature $s$.
+        \item Bob receives the message and the signature, he can then verify $s$ with public key $e$ and a \textit{verification algorithm}.
+        \item Given $m$ and $s$, the verification algorithm returns true to indicate a valid signature and false otherwise.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{RSA signatures}
+    \begin{itemize}
+        \item To use RSA for digital signature, we again let $p$ and $q$ be two distinct primes.
+        \item $n=pq$, choose $e\in\ZZ_{\varphi(n)}^*$, compute $d$ such that $de\mo\varphi(n)=1$
+        \item The public key consists of $e$ and $n$.
+        \item $d$ is the private key.
+        \item $p$, $q$ and $\varphi(n)$ should be kept secret.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{RSA signatures}
+To sign a message $m$, Alice computes the signature
+\[
+s=m^d\mo n.
+\]
+Then Alice sends both $m$ and $s$ to Bob.
+To verify the signature, Bob computes
+\[
+s^e\mo n.
+\]
+If $s\equiv m\mo n$, then the verification algorithm outputs true, and false otherwise.
+\begin{itemize}
+    \item Up to now, the only method known to compute $s$ from $m\mo n$ is using $d$, so if the verification algorithm outputs true, Bob can conclude that Alice is the owner of $d$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{RSA signatures -- Example}
+\begin{example}
+\begin{itemize}
+    \item Alice chooses $p=5$ and $q=7$.
+    \item Then $n=35$ and $\varphi(n)=24$.
+    \item Suppose Alice chooses $e=5$, which is coprime to $24$.
+    \item  By the extended Euclidean algorithm Alice computes $d=5$
+     \item To sign message $m=10$, Alice computes
+    \[
+    s=m^d\mo n=?
+    \]
+    \item Alice sends both the message and signature to Bob.
+    \item Bob verifies the signature
+    \[
+    s^e\mo n= 5^5\mo 35 = 10 = m.
+    \]
+\end{itemize}
+\end{example}
+\end{frame}

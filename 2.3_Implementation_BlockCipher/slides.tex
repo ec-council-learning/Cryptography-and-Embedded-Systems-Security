@@ -1,0 +1,325 @@
+\begin{frame}{Building blocks}
+    \begin{itemize}
+        \item Building blocks for a symmetric block cipher: bitwise \texttt{XOR} with round key, Sbox, and permutation.
+        \item It is easy in both software and hardware to implement bitwise \texttt{XOR} with a round key.
+        \begin{itemize}
+            \item In hardware, there is an \texttt{XOR} gate 
+            \item almost every processor has a dedicated \texttt{XOR} instruction
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Implementing Sboxes}
+    \begin{itemize}
+        \item In software, a na\"ive way to implement Sbox is to use a lookup table. 
+        \item The table is stored as an array in random access memory or flash memory.
+        \item The storage space required for an Sbox SB$:\FF_2^{\omega_1}\to\FF_2^{\omega_2}$ is $\omega_2\times2^{\omega_1}$.
+       \item For example, PRESENT has a $4-$bit Sbox and the storage required is $2^4\times4=64$ bits, or $8$ bytes.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{AES -- T-tables}
+    \begin{itemize}
+        \item Implementation method that combines SubBytes, ShiftRows, and MixColumns for AES round function.
+        \item SB: the AES Sbox.
+        \item Let us denote the input of SubBytes by a matrix $S$
+    \[
+    S=
+    \begin{pmatrix}
+    s_{00} & s_{01} & s_{02} & s_{03}\\
+    s_{10} & s_{11} & s_{12} & s_{13}\\
+    s_{20} & s_{21} & s_{22} & s_{23}\\
+    s_{30} & s_{31} & s_{32} & s_{33}
+    \end{pmatrix}
+    \vspace*{-0.2cm}
+    \]
+    \item $A, B, D$: outputs of SubBytes, ShiftRows, MixColumns
+    \item $a_{ij}=\text{SB}(s_{ij}), 0\leq i,j<4$.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{AES -- T-tables}
+    \begin{itemize}
+    \item SB: AES Sbox.
+    \item $S$: input of SubBytes
+    \item $A, B, D$: outputs of SubBytes, ShiftRows, MixColumns
+    \item $a_{ij}=\text{SB}(s_{ij}), 0\leq i,j<4$.
+    \item For $j=0,1,2,3$
+    \end{itemize}
+\[
+\begin{pmatrix}
+    b_{0j}\\
+    b_{1j}\\
+    b_{2j}\\
+    b_{3j}
+    \end{pmatrix}
+    =
+    \begin{pmatrix}
+    a_{0j}\\
+    a_{1(j+1\mo 4)}\\
+    a_{2(j+2\mo 4)}\\
+    a_{3(j+3\mo 4)}
+    \end{pmatrix},\quad
+    \begin{pmatrix}
+    d_{0j}\\
+    d_{1j}\\
+    d_{2j}\\
+    d_{3j}
+    \end{pmatrix}
+    =
+    \begin{pmatrix}
+    \texttt{02} & \texttt{03} & \texttt{01} & \texttt{01} \\
+    \texttt{01} & \texttt{02} & \texttt{03} & \texttt{01} \\
+    \texttt{01} & \texttt{01} & \texttt{02} & \texttt{03} \\
+    \texttt{03} & \texttt{01} & \texttt{01} & \texttt{02}
+    \end{pmatrix}
+    \begin{pmatrix}
+    b_{0j}\\
+    b_{1j}\\
+    b_{2j}\\
+    b_{3j}
+    \end{pmatrix},
+\]
+\end{frame}
+
+\begin{frame}{AES -- T-tables}
+$D$: output of MixColumns
+    \begin{eqnarray*}
+    \begin{pmatrix}
+    d_{0j}\\
+    d_{1j}\\
+    d_{2j}\\
+    d_{3j}
+    \end{pmatrix}
+    &=&
+    \begin{pmatrix}
+    \texttt{02} & \texttt{03} & \texttt{01} & \texttt{01} \\
+    \texttt{01} & \texttt{02} & \texttt{03} & \texttt{01} \\
+    \texttt{01} & \texttt{01} & \texttt{02} & \texttt{03} \\
+    \texttt{03} & \texttt{01} & \texttt{01} & \texttt{02}
+    \end{pmatrix}
+    \begin{pmatrix}
+    \text{SB}(s_{0j})\\
+    \text{SB}(s_{1(j+1\mo 4)})\\
+    \text{SB}(s_{2(j+2\mo 4)})\\
+    \text{SB}(s_{3(j+3\mo 4)})
+    \end{pmatrix}\\
+    &=&
+    \begin{pmatrix}
+    \texttt{02}\\
+    \texttt{01}\\
+    \texttt{01}\\
+    \texttt{03}
+    \end{pmatrix}\text{SB}(s_{0j})
+    \oplus
+    \begin{pmatrix}
+    \texttt{03}\\
+    \texttt{02}\\
+    \texttt{01}\\
+    \texttt{01}
+    \end{pmatrix}\text{SB}(s_{1(j+1\mo 4)})\\
+    &&\oplus
+    \begin{pmatrix}
+    \texttt{01}\\
+    \texttt{03}\\
+    \texttt{02}\\
+    \texttt{01}
+    \end{pmatrix}\text{SB}(s_{2(j+2\mo 4)})
+    \oplus
+    \begin{pmatrix}
+    \texttt{01}\\
+    \texttt{01}\\
+    \texttt{03}\\
+    \texttt{02}
+    \end{pmatrix}\text{SB}(s_{3(j+3\mo 4)}),
+    \end{eqnarray*}
+\end{frame}
+
+\begin{frame}{AES -- T-tables}
+For $a\in\FF_2^8$, define
+\begin{equation*}
+    \begin{array}{ll}
+    T_0(a):=\begin{pmatrix}
+    \texttt{02}\\
+    \texttt{01}\\
+    \texttt{01}\\
+    \texttt{03}
+    \end{pmatrix}\text{SB}(a), & 
+    T_1(a):=\begin{pmatrix}
+    \texttt{03}\\
+    \texttt{02}\\
+    \texttt{01}\\
+    \texttt{01}
+    \end{pmatrix}\text{SB}(a),\\ 
+      T_2(a):=\begin{pmatrix}
+    \texttt{01}\\
+    \texttt{03}\\
+    \texttt{02}\\
+    \texttt{01}
+    \end{pmatrix}\text{SB}(a), & 
+    T_3(a):=\begin{pmatrix}
+    \texttt{01}\\
+    \texttt{01}\\
+    \texttt{03}\\
+    \texttt{02}
+    \end{pmatrix}\text{SB}(a).
+    \end{array}
+\end{equation*}
+Then
+\[
+\begin{pmatrix}
+    d_{0j}\\
+    d_{1j}\\
+    d_{2j}\\
+    d_{3j}
+    \end{pmatrix}
+    =T_0(s_{0j})\oplus T_1(s_{1(j+1\mo 4)})
+    \oplus T_2(s_{2(j+2\mo 4)})T_3(s_{3(j+3\mo 4)}),
+\]
+\end{frame}
+
+\begin{frame}{AES -- T-tables}
+    \begin{itemize}
+        \item The four tables $T_0, T_1, T_2, T_3$ of size $8\times32$ can be used to implement SubBytes, ShiftRows, and MixColumns
+       \item Those four tables are called \textit{T-tables} for AES.
+       \item To store the T-tables we need processors with a word length of $32$ or above.
+       \item They cannot be used for the last round of AES as there is no Mixcolumns operation.
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}{PRESENT Sbox -- lookup table}
+PRESENT Sbox:
+\begin{table}
+\centering
+\ttfamily
+\begin{tabular}{cccccccccccccccc}\hline
+ 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & A & B & C & D & E & F \\\hline
+ C & 5 & 6 & B & 9 & 0 & A & D & 3 & E & F & 8 & 4 & 7 & 1 & 2\\\hline
+\end{tabular}
+\end{table}
+\begin{algorithm}[H]
+	\textbf{integer array} [1..16] Sbox = \{\texttt{C}, \texttt{5}, \texttt{6}, \texttt{B}, \texttt{9}, \texttt{0}, \texttt{A}, \texttt{D}, \texttt{3}, \texttt{E}, \texttt{F}, \texttt{8}, \texttt{4}, \texttt{7}, \texttt{1}, \texttt{2}\}\\
+ s = Sbox[s] \tcp{Table lookup}
+ \caption{A lookup table implementation of PRESENT Sbox in pseudocode.}
+\end{algorithm}
+\begin{itemize}
+        \item As current computer architectures normally use word sizes of at least one byte (generally multiple bytes), it is not efficient to implement Sbox nibble-wise.
+To optimize the execution time, we can merge two PRESENT Sbox lookup tables
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{PRESENT Sbox -- lookup table}
+    \begin{itemize}
+        \item To optimize the execution time, we can merge two PRESENT Sbox lookup tables
+    \end{itemize}
+\begin{algorithm}[H]
+	\textbf{integer array} [1..16] Sbox =\{\texttt{C}, \texttt{5}, \texttt{6}, \texttt{B}, \texttt{9}, \texttt{0}, \texttt{A}, \texttt{D}, \texttt{3}, \texttt{E}, \texttt{F}, \texttt{8}, \texttt{4}, \texttt{7}, \texttt{1}, \texttt{2}\}\\
+ \textbf{integer} big\_s = Sbox[s \& 0x0F] \tcp{Lower nibble; $\&$: bitwise \texttt{AND}}
+ big\_s = big\_s $\vee$ (Sbox[(s$\gg$4) \& 0x0F] $\ll$4) \tcp{Upper nibble; $\vee$: bitwise \texttt{OR}}
+ s = big\_s \tcp{State update}
+ \caption{A more efficient lookup table implementation of PRESENT Sbox in pseudocode.}
+\end{algorithm}
+\end{frame}
+
+\begin{frame}{PRESENT Sbox -- lookup table}
+    \begin{itemize}
+        \item To avoid the bit shifts and boolean operations, it is better to combine two $4\times4$ Sbox tables into one bigger $8\times8$ table
+    \end{itemize}
+\begin{algorithm}[H]
+	\textbf{integer array} [1..256] Sbox = \{\texttt{CC}, \texttt{C5}, $\dots$, \texttt{C1}, \texttt{C2}, \texttt{5C}, \texttt{55}, $\dots$, \texttt{51}, \texttt{52}, $\dots$ \texttt{2C}, \texttt{25}, $\dots$, \texttt{21}, \texttt{22}\}\\
+ s = Sbox[s] \tcp{Table lookup of two nibbles in parallel}
+\caption{A lookup table implementation combining two PRESENT Sboxes in parallel in pseudocode.}
+\end{algorithm}
+\end{frame}
+
+\begin{frame}{Implementing permutations}
+    \begin{itemize}
+        \item The efficiency of the implementation is highly dependent on the design of the permutation.
+        \item For AES ShiftRows, the bytes are permuted, making it easier to implement.
+        \item For PRESENT pLayer, the bit level permutations are ``free'' in hardware as we just need to reorder the wires, no new gates are required.
+        \item However, in software, extracting each bit and putting it in the right position is time-consuming.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{PRESENT -- combine sBoxLayer and pLayer}
+    \begin{itemize}
+        \item Construct sixteen $4\times64$ lookup tables, TB1, TB2, $\dots$, TB16.
+       \item The input of TBi is given by the $i$th nibble of the cipher state at the input of sBoxLayer.
+       \item The outputs are $64-$bit values with mostly $0$s except for $4$ bits that correspond to the input nibble.
+    \end{itemize}
+\begin{alertblock}{Remark}
+For PRESENT specification, we consider the $0$th bit of a value as the rightmost bit in its binary representation.
+For example, the $0$th bit of $3=011_2$ is $1$, the $1$st bit is $1$ and the $2$nd bit is $0$.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}{PRESENT -- combine sBoxLayer and pLayer}
+\begin{itemize}
+    \item TB1: input is the first nibble of the cipher state at the input of sBoxLayer.
+\item The Sbox output corresponding to this nibble should go to bits $0,16,32$ and $48$ of the output of pLayer.
+\item Each entry of TB1 is a $64-$bit value with bits in positions $0,16,32$ and $48$ given by the Sbox output, and the other bits are all $0$.
+\end{itemize}
+\begin{example}
+If the input is \texttt{A}, the Sbox output should be $\texttt{F}=1111_2$ and
+\[
+\text{TB1}[\texttt{A}]=0\dots010\dots010\dots010\dots1,
+\]
+where the $0$th, $16$th, $32$nd and $48$th bits are $1$.
+\end{example}
+\begin{table}
+\centering
+\ttfamily
+\begin{tabular}{cccccccccccccccc}\hline
+ 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & A & B & C & D & E & F \\\hline
+ C & 5 & 6 & B & 9 & 0 & A & D & 3 & E & F & 8 & 4 & 7 & 1 & 2\\\hline
+\end{tabular}
+\caption{PRESENT Sbox}
+\end{table}
+\end{frame}
+
+\begin{frame}{PRESENT -- combine sBoxLayer and pLayer}
+\begin{itemize}
+    \item TB1: input is the first nibble of the cipher state at the input of sBoxLayer.
+\item The Sbox output corresponding to this nibble should go to bits $0,16,32$ and $48$ of the output of pLayer.
+\item Each entry of TB1 is a $64-$bit value with bits in positions $0,16,32$ and $48$ given by the Sbox output, and the other bits are all $0$.
+\end{itemize}
+\begin{example}
+PRESENT Sbox output for input \texttt{B} is $1000_2$, and
+\[
+\text{TB1}[\texttt{B}]=0\dots010\dots0,
+\]
+where the $48$th bit is $1$.
+\end{example}
+\end{frame}
+
+\begin{frame}{PRESENT -- combine sBoxLayer and pLayer}
+\begin{table}
+\centering
+\begin{tabular}{cccccccccccccccc}\hline
+0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 & 15 \\
+0 & 16 & 32 & 48 & 1 & 17 & 33 & 49 & 2 & 18 & 34 & 50 & 3 & 19 & 35 & 51 \\\hline
+\end{tabular}
+\end{table}
+\begin{example}
+TB2 takes the second nibble of the cipher state as input.
+The output bits should be positioned at $1,17,33$ and $49$.
+Thus
+\[
+\text{TB2}[\texttt{B}]=0\dots010\dots0,
+\]
+where only the $49$th bit is $1$.
+\end{example}
+\end{frame}
+
+\begin{frame}{PRESENT -- combine sBoxLayer and pLayer}
+    \begin{itemize}
+        \item A $4\times64$ table takes $64\times2^4$ bits and those sixteen tables take $16384$ bits of memory.
+        \item Compared to one Sbox table, which is $64$ bits, this is much bigger, but these tables also implement pLayer of PRESENT.
+       \item The speed can be further improved by merging two Sbox computations and constructing eight $8\times64$ lookup tables.
+       \begin{itemize}
+           \item The memory consumption will be the same, $16384$ bits.
+           \item But the speed will be much faster.
+       \end{itemize}
+    \end{itemize}
+\end{frame}

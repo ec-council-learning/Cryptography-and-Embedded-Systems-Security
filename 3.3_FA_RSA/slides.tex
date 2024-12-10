@@ -1,0 +1,524 @@
+\begin{frame}{Remarks}
+    \begin{itemize}
+        \item Unlike fault attacks on symmetric block ciphers, attacks on public key ciphers depend on the underlying intractable problem and we do not have a systematic methodology.
+        \item However, the general attack concept can be applied to ciphers based on similar intractable problems.
+        \item We will discuss an attack on RSA signatures in this video and the corresponding countermeasure in the next video
+        \item The attack we will see can also be applied to RSA decryption process
+    \end{itemize}
+\end{frame}
+
+\section{RSA Signatures and Implementations}
+\begin{frame}{\VideoName}
+    \tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}{RSA}
+\begin{definition}[RSA]
+Let $n=pq$, where $p,q$ are distinct prime numbers.
+Let $\mathcal{P}=\mathcal{C}=\ZZ_n$, $\mathcal{K}=\ZZ_{\varphi(n)}^*-\Set{1}$.
+For any $e\in \mathcal{K}$, define encryption
+\[
+    E_e:\ZZ_n\to\ZZ_n,\quad m\mapsto m^e\mo n,
+\]
+and the corresponding decryption
+\[
+    D_d:\ZZ_n\to\ZZ_n,\quad c\mapsto c^d\mo n,
+\]
+where $de\mo\varphi(n)=1$.
+The cryptosystem $(\mathcal{P},\mathcal{C},\mathcal{K},\mathcal{E},\mathcal{D})$, where $\mathcal{E}=\Set{E_e:e\in\mathcal{K}}$, $\mathcal{D}=\Set{D_d:d\in\mathcal{K}}$, is called \textit{RSA}.
+\end{definition}
+\begin{itemize}
+    \item $\varphi(n)=(p-1)(q-1)$
+    \item Public key: $n,e$, RSA modulus, encryption exponent
+    \item Private key: $d$, decryption exponent
+\end{itemize}
+\end{frame}
+
+\begin{frame}{RSA signatures}
+    \begin{itemize}
+        \item To use RSA for digital signature, we again let $p$ and $q$ be two distinct primes.
+        \item $n=pq$, choose $e\in\ZZ_{\varphi(n)}^*$, compute $d$ such that $de\mo\varphi(n)=1$
+        \item The public key consists of $e$ and $n$.
+        \item $d$ is the private key.
+        \item $p$, $q$ and $\varphi(n)$ should be kept secret.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{RSA signatures}
+To sign a message $m$, Alice computes the signature
+\[
+s=m^d\mo n.
+\]
+Then Alice sends both $m$ and $s$ to Bob.
+To verify the signature, Bob computes
+\[
+s^e\mo n.
+\]
+If $s\equiv m\mo n$, then the verification algorithm outputs true, and false otherwise.
+\begin{itemize}
+    \item Up to now, the only method known to compute $s$ from $m\mo n$ is using $d$, so if the verification algorithm outputs true, Bob can conclude that Alice is the owner of $d$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Notations}
+    \begin{itemize}
+        \item $n$ has bit length $\ell_n$, 
+\begin{equation*}
+    2^{\ell_n-1}\leq n<2^{\ell_n}.
+\end{equation*}
+        \item $a, b\in\ZZ_n$, in particular, $0\leq a,b<n$.
+       \item $\omega$: the computer's word size
+       \begin{itemize}
+           \item for a 64-bit processor, the \textit{word size} is 64
+       \end{itemize}
+       \item Let $\kappa=\lceil \ell_n/\omega\rceil$, i.e. $(\kappa-1)\omega<\ell_n\leq \kappa\omega$.
+      \item Then ($||$ indicates concatenation, $0\leq a_i< 2^{\omega}$)
+\[
+a=a_{\kappa-1}||a_{\kappa-2}||\dots||a_0,
+\]
+      \item Note that some $a_i$ might be $0$ if the bit length of $a$ is less than $\ell_n$. We have
+\begin{equation*}
+a=\sum_{i=0}^{\kappa-1}a_i(2^\omega)^i.
+\end{equation*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Blakley's method}
+\begin{itemize}
+\item We would like to compute
+\[
+R=ab\mo n.
+\]
+\item Since
+\begin{equation*}
+a=\sum_{i=0}^{\kappa-1}a_i(2^\omega)^i,
+\end{equation*}
+where $0\leq a_i< 2^{\omega}$.
+ \item The product $ab$ can be computed as follows
+\end{itemize}
+\[
+t=ab=\left(\sum_{i=0}^{\kappa-1} a_i(2^\omega)^i\right)b=\sum_{i=0}^{\kappa-1}(2^\omega)^ia_ib,
+\]
+\end{frame}
+
+\begin{frame}{}
+    \begin{algorithm}[H]
+\KwIn{$n,\ a,\ b$\tcp{$n\in\ZZ, n\geq2$ has bit length $\ell_n$; $a,b\in\ZZ_n$}}
+\KwOut{$ab\mo n$}
+$R=0$\\
+\tcp{$\kappa=\lceil \ell_n/\omega\rceil$, where $\omega$ is the word size of the computer}
+	\For{$i=\kappa-1$, $i\geq0$, $i--$}
+ 	{
+ 	$R=2^{\omega}R+a_ib$\\
+        $R=R\mo n$
+  	}
+  	\Return $R$
+	\caption{Blakely's method for computing modular multiplication.}
+\end{algorithm}
+\end{frame}
+
+\begin{frame}{Right-to-left Square and Mulitply Algorithm}
+    \begin{algorithm}[H]
+\KwIn{$n,\ m,\ d$}
+\KwOut{$s=m^d\mo n$}
+$s= 1$, $t = m$\\
+	\For{$i=0$, $i<\ell_d$, $i++$}
+ 	{
+ 	\tcp{$i$th bit of $d$ is $1$}
+  		\If{$d_i=1$}{
+            \tcp{multiply by $m^{2^i}$}
+  		$s=s*t\mo n$\\
+  		}
+  		\tcp{$t=m^{2^{i+1}}$}
+  		$t=t*t\mo n$\\
+  	}
+  	\Return $s$\\
+	\caption{Computing RSA signature with the right-to-left square and multiply algorithm.}
+\end{algorithm}
+\end{frame}
+
+\begin{frame}{Right-to-left square and multiply algorithm with Blakely's method}
+    \begin{itemize}
+        \item Since $\ell_n$ is the bit length of $n$, the bit lengths of the variables $s$ and $t$ are at most $\ell_n$.
+        \item $\omega$ is the computer's word size
+        \[
+        \kappa=\lceil \ell_n/\omega\rceil
+        \]
+        \item We can write
+\[
+s=\sum_{j=0}^{\kappa-1}s_j(2^{\omega})^j,\quad t=\sum_{j=0}^{\kappa-1}t_j(2^{\omega})^j.
+\]
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Right-to-left square and multiply algorithm with Blakely's method}
+Input: $n,m,d$. $\quad$ Output: $m^d\mo n$
+{\small
+{
+\setlength{\interspacetitleruled}{0pt}%
+\setlength{\algotitleheightrule}{0pt}%
+    \begin{algorithm}[H]
+% \KwIn{$n,\ m,\ d$
+% }
+% \KwOut{$m^d\mo n$}
+$s= 1,\quad$
+$t = m$\\
+	\For{$i=0$, $i<\ell_d$, $i++$}
+ 	{
+  		\If{$d_i=1$}{
+    \tcp{lines~\ref{line:alg:fablakelyrtlsam:R=0rt} --~\ref{line:alg:fablakelyrtlsam:r=R} implement $s=s*t\mo n$}
+            $R=0$\label{line:alg:fablakelyrtlsam:R=0rt}\\
+            \For{$j=\kappa-1$, $j\geq0$, $j--$}{
+            $R=2^\omega R+s_jt$\label{line:alg:fablakelyrtlsam:sjt}\\
+            $R=R\mo n$
+            }
+            $s=R$\label{line:alg:fablakelyrtlsam:r=R}
+  		}
+            $R=0$\label{line:alg:fablakelyrtlsam:R=0tt}\tcp{lines~\ref{line:alg:fablakelyrtlsam:R=0tt} --~\ref{line:alg:fablakelyrtlsam:t=R} implement $t=t*t\mo n$}
+            \For{$j=\kappa-1$, $j\geq0$, $j--$}{
+            \label{line:alg:fablakelyrtlsam:for2}
+            $R=2^\omega R+t_jt$\\
+            $R=R\mo n$
+            }
+            $t=R$\label{line:alg:fablakelyrtlsam:t=R}\\
+  	}
+  	\Return $s$\\
+\end{algorithm}}}
+\end{frame}
+
+\begin{frame}{Right-to-left square and multiply algorithm with Blakely's method}
+\begin{columns}[T] % align columns
+\begin{column}{.45\textwidth}
+{\small
+{
+\setlength{\interspacetitleruled}{0pt}%
+\setlength{\algotitleheightrule}{0pt}%
+    \begin{algorithm}[H]
+$s= 1,\quad$
+$t = m$\\
+	\For{$i=0$, $i<\ell_d$, $i++$}
+ 	{
+  		\If{$d_i=1$}{
+            $R=0$\\
+            \For{$j=\kappa-1$, $j\geq0$, $j--$}{
+            \label{line:alg:fablakelyrtlsam:for1}
+            $R=2^\omega R+s_jt$\\
+            $R=R\mo n$
+            }
+            $s=R$
+  		}
+            $R=0$\\
+            \For{$j=\kappa-1$, $j\geq0$, $j--$}{
+            $R=2^\omega R+t_jt$\\
+            $R=R\mo n$
+            }
+            $t=R$\\
+  	}
+  	\Return $s$\\
+\end{algorithm}}}
+\end{column}%
+\hfill%
+\begin{column}{.58\textwidth}
+\begin{example}
+\[
+n=15,\quad d=3=11_2,\quad m=2,\quad \ell_d=2,\quad \kappa=2.
+\]
+\[
+\begin{array}{llll}
+i=0,d_0=1 & \text{line 5}  & j=1 & R=s_1t\mo n=0\\
+   &  & j=0 & R=s_0t\mo n=2\\
+   & \text{line 8}  & s=2 & s_0=10, s_1=00\\
+  &  \text{line 10} & j=1 & R=0\\
+   & & j=0 & R=4\\
+   &\text{line 13} & t=4 & t_{0}=00, t_{1}=01\\
+i=1,d_1=1 & \text{line 5} & j=1 & R=0\\
+& & j=0 & R=8\\
+& \text{line 9} & s=8
+\end{array}
+\]
+\[
+m^d\mo n=2^3\mo15=8
+\]
+\end{example}
+\end{column}%
+\end{columns}
+\end{frame}
+
+
+\section{Safe Error Attack}
+\begin{frame}{\VideoName}
+    \tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}{The attack}
+    \begin{itemize}
+        \item Targets square and multiply algorithm
+        \item Assumes Blakely's method used for modular multiplication implementation
+        \item The attack exploits the knowledge of whether an intermediate faulty value is used or not by observing whether the final output is changed, thus the name \textit{safe error attack}~\footnote{Yen, S. M., \& Joye, M. (2000). Checking before output may not be enough against fault-based cryptanalysis. IEEE Transactions on computers}.
+       \item Since only knowing whether the output is changed or not is enough, if a countermeasure that repeats the computation, compares the final results, and outputs an error when a fault is detected is implemented, the safe error attack still applies.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Recall -- Notations}
+    \begin{itemize}
+        \item $n$ has bit length $\ell_n$, 
+\begin{equation*}
+    2^{\ell_n-1}\leq n<2^{\ell_n}.
+\end{equation*}
+        \item $a, b\in\ZZ_n$, in particular, $0\leq a,b<n$.
+       \item $\omega$: the computer's word size
+       \begin{itemize}
+           \item for a 64-bit processor, the \textit{word size} is 64
+       \end{itemize}
+       \item Let $\kappa=\lceil \ell_n/\omega\rceil$, i.e. $(\kappa-1)\omega<\ell_n\leq \kappa\omega$.
+      \item Then ($||$ indicates concatenation, $0\leq a_i< 2^{\omega}$)
+\[
+a=a_{\kappa-1}||a_{\kappa-2}||\dots||a_0,
+\]
+      \item Note that some $a_i$ might be $0$ if the bit length of $a$ is less than $\ell_n$. We have
+\begin{equation*}
+a=\sum_{i=0}^{\kappa-1}a_i(2^\omega)^i.
+\end{equation*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Attack on a simple algorithm}
+    \begin{algorithm}[H]
+\KwIn{$n,\ a,\ b,\ c$\tcp{$a,b\in\ZZ_n$; $c=0,1$}}
+\KwOut{$ab\mo n$ if $c=1$ and $a$ otherwise}
+\If{$c=1$}{
+$R=0$\\
+\tcp{$\kappa=\lceil \ell_n/\omega\rceil$, where $\omega$ is the computer's word size}
+	\For{$i=\kappa-1$, $i>=0$, $i--$}
+ 	{
+ 	$R=2^\omega R+a_ib$\\
+ 	$R=R\mo n$\\
+  	}
+  	$a=R$\\
+  }
+  	\Return $a$
+\caption{An algorithm involving computing modular multiplication with Blakely's method.}
+\end{algorithm}
+\end{frame}
+
+\begin{frame}{Attack on a simple algorithm}
+\begin{columns}[T] % align columns
+\begin{column}{.4\textwidth}
+{
+\setlength{\interspacetitleruled}{0pt}%
+\setlength{\algotitleheightrule}{0pt}%
+\begin{algorithm}[H]
+\KwIn{$n,\ a,\ b,\ c$}
+\KwOut{$ab\mo n$ if $c=1$ and $a$ otherwise}
+\If{$c=1$}{
+$R=0$\\
+	\For{$i=\kappa-1$, $i>=0$, $i--$
+ \label{line:alg:farsaexblakely:loop}
+ }
+ 	{
+ 	$R=2^\omega R+a_ib$\\
+ 	$R=R\mo n$\\
+  	}
+  	$a=R$\\
+  }
+  	\Return $a$
+\end{algorithm}
+}
+\end{column}%
+\hfill%
+\begin{column}{.6\textwidth}
+ \begin{itemize}
+        \item Attacker has the knowledge of the correct output for a pair of $a$ and $b$.
+       \item Can rerun the algorithm with the same input, inject fault, and observe the output.
+        \item Suppose $c=1$ and a fault is injected during the loop starting from line~\ref{line:alg:farsaexblakely:loop} in the register containing $a_{i_0}$ when $i<i_0$ -- the fault in $a_{i_0}$ will not affect the output since $a_{i_0}$ is used when $i$ is equal to $i_0$.
+       \item If $c=0$ and a fault is injected in the register containing $a_{i_0}$ during the computation, then the final result will be faulty since the faulty value in $a$ will be returned.
+    \end{itemize}
+\end{column}%
+\end{columns}
+\end{frame}
+
+
+\begin{frame}{Attack on a simple algorithm}
+    \begin{columns}[T] % align columns
+\begin{column}{.42\textwidth}
+{
+\setlength{\interspacetitleruled}{0pt}%
+\setlength{\algotitleheightrule}{0pt}%
+\begin{algorithm}[H]
+\KwIn{$n,\ a,\ b,\ c$}
+\KwOut{$ab\mo n$ if $c=1$ and $a$ otherwise}
+\If{$c=1$}{
+$R=0$\\
+	\For{$i=\kappa-1$, $i>=0$, $i--$}
+ 	{
+ 	$R=2^\omega R+a_ib$\\
+ 	$R=R\mo n$\\
+  	}
+  	$a=R$\\
+  }
+  	\Return $a$
+\end{algorithm}
+}
+\end{column}%
+\hfill%
+\begin{column}{.63\textwidth}
+ \begin{itemize}
+        \item Attacker knows: correct output, $a$, $b$.
+        \item If $c=1$ and a fault is injected during the loop starting from line~\ref{line:alg:farsaexblakely:loop} in the register containing $a_{i_0}$ when $i<i_0$ -- output will not be affected
+       \item If $c=0$, output will be faulty
+       \item Now, if the attacker does not know the value of $c$ and would like to recover it by fault injection attacks.
+       \item Assume that $c=1$ and the loop in line~\ref{line:alg:farsaexblakely:loop} is executed.
+        \item Injects fault in $a_{i_0}$ at the time when $i$ is less than $i_0$.
+       \item Compares the output with the correct one and recovers the value of $c$ -- if the output is correct, $c=1$; otherwise $c=0$.
+    \end{itemize}
+\end{column}%
+\end{columns}
+\end{frame}
+
+\begin{frame}{Safe error attack on RSA Signatures}
+\begin{columns}[T] % align columns
+\begin{column}{.45\textwidth}
+{\small
+{
+\setlength{\interspacetitleruled}{0pt}%
+\setlength{\algotitleheightrule}{0pt}%
+    \begin{algorithm}[H]
+$s= 1,\quad$
+$t = m$\\
+	\For{$i=0$, $i<\ell_d$, $i++$}
+ 	{
+  		\If{$d_i=1$}{
+            $R=0$\\
+            \For{$j=\kappa-1$, $j\geq0$, $j--$}{
+            $R=2^\omega R+s_jt$\\
+            $R=R\mo n$
+            }
+            $s=R$
+  		}
+            $R=0$\\
+            \For{$j=\kappa-1$, $j\geq0$, $j--$}{
+            $R=2^\omega R+t_jt$\\
+            $R=R\mo n$
+            }
+            $t=R$\\
+  	}
+  	\Return $s$\\
+\end{algorithm}}}
+\end{column}%
+\hfill%
+\begin{column}{.58\textwidth}
+\begin{itemize}
+        \item Suppose $d_i=1$ and a fault is injected during the $i$th iteration of the outer loop and at the time when $j<j_0$ during the loop starting from line~\ref{line:alg:fablakelyrtlsam:for1}, in the register containing $s_{j_0}$ -- correct output 
+       \item If $d_i=0$ and a fault is injected during the $i$th iteration of the outer loop in the register containing $s_{j_0}$ -- faulty output
+       \item Similarly to the attack on the simple algorithm, the attacker first assumes $d_i=1$, and injects fault in $s_{j_0}$ at the time corresponding to $j<j_0$.
+\item If the final result is not changed, the attacker can conclude that $d_i=1$, otherwise, $d_i=0$.
+    \end{itemize}
+\end{column}%
+\end{columns}
+\end{frame}
+
+\begin{frame}{Safe error attack on RSA signatures -- Example}
+\begin{columns}[T] % align columns
+\begin{column}{.45\textwidth}
+{\small
+{
+\setlength{\interspacetitleruled}{0pt}%
+\setlength{\algotitleheightrule}{0pt}%
+    \begin{algorithm}[H]
+$s= 1,\quad$
+$t = m$\\
+	\For{$i=0$, $i<\ell_d$, $i++$}
+ 	{
+  		\If{$d_i=1$}{
+            $R=0$\\
+            \For{$j=\kappa-1$, $j\geq0$, $j--$}{
+            \label{line:alg:fablakelyrtlsam:for1}
+            $R=2^\omega R+s_jt$\\
+            $R=R\mo n$
+            }
+            $s=R$
+  		}
+            $R=0$\\
+            \For{$j=\kappa-1$, $j\geq0$, $j--$}{
+            $R=2^\omega R+t_jt$\\
+            $R=R\mo n$
+            }
+            $t=R$\\
+  	}
+  	\Return $s$\\
+\end{algorithm}}}
+\end{column}%
+\hfill%
+\begin{column}{.58\textwidth}
+\begin{example}
+\[
+n=15,\quad d=3=11_2,\quad m=2,\quad \ell_d=2,\quad \kappa=2.
+\]
+\[
+\begin{array}{llll}
+i=0,d_0=1 & \text{line 5}  & j=1 & R=\textcolor{blue}{s_1}t\mo n=0\\
+   &  & j=0 & R=s_0t\mo n=2\\
+   & \text{line 8}  & s=2 & s_0=10, \textcolor{orange}{s_1}=00\\
+  &  \text{line 10} & j=1 & R=0\\
+   & & j=0 & R=4\\
+   &\text{line 13} & t=4 & t_{0}=00, t_{1}=01\\
+i=1,d_1=1 & \text{line 5} & j=1 & R=0\\
+& & j=0 & R=8\\
+& \text{line 9} & s=8
+\end{array}
+\]
+Makes guess $d_0=1$, injects fault into $s_1$ when $i=0$, $j=0$ (line 5)
+\end{example}
+\end{column}%
+\end{columns}
+\end{frame}
+
+\begin{frame}{Safe error attack on RSA signatures -- Example}
+    \begin{example}
+\[
+n=15,\quad d=3=11_2,\quad m=2,\quad \ell_d=2,\quad \kappa=2.
+\]
+\[
+\begin{array}{llll}
+i=0,d_0=1 & \text{line 5}  & j=1 & R=\textcolor{blue}{s_1}t\mo n=0\\
+   &  & j=0 & R=s_0t\mo n=2\\
+   & \text{line 8}  & s=2 & s_0=10, \textcolor{orange}{s_1}=00\\
+  &  \text{line 10} & j=1 & R=0\\
+   & & j=0 & R=4\\
+   &\text{line 13} & t=4 & t_{0}=00, t_{1}=01\\
+i=1,d_1=1 & \text{line 5} & j=1 & R=0\\
+& & j=0 & R=8\\
+& \text{line 9} & s=8
+\end{array}
+\]
+\begin{itemize}
+\item Makes guess $d_0=1$, injects fault into $s_1$ when $i=0$, $j=0$ (line 5)
+    \item $s_1$ is used (blue \textcolor{blue}{$s_1$}) before $j=0$ and reassigned value in line~8 (orange \textcolor{orange}{$s_1$}).
+\item Thus the computations are not affected and the final result is unchanged.
+\item The attacker can conclude that $d_0=1$.
+\end{itemize}
+
+\end{example}
+\end{frame}
+
+\begin{frame}{Safe error attack on RSA signatures}
+    \begin{itemize}
+\item The attacker can repeat the attack for different values of $i$ to recover the entire private key.
+\item Similar techniques can also be applied to attack the left-to-right square and multiply algorithm with Blakely's method\footnote{Yen, S. M., \& Joye, M. (2000). Checking before output may not be enough against fault-based cryptanalysis. IEEE Transactions on Computers}.
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Final Remarks}
+    \begin{itemize}
+        \item The very first fault attack, the Bellcore attack, on cryptographic implementations was proposed by Boneh et al.\footnote{Boneh, D., DeMillo, R. A., \& Lipton, R. J. (1997, May). On the importance of checking cryptographic protocols for faults. In International conference on the theory and applications of cryptographic techniques (pp. 37-51). Springer, Berlin, Heidelberg.} for attacking RSA signatures.
+        \begin{itemize}
+            \item Given one faulty signature, attacker can factor the RSA modulus
+            \item In this paper, the authors also discussed an attack aiming at the intermediate values of the square and multiply algorithm to recover the private key.
+        \end{itemize}
+        \item Even though no systematic methodologies exist for fault attacks on public key ciphers, the general attack concept can be applied to a different cipher based on a similar intractable problem.
+        \begin{itemize}
+            \item For example, an attack on the square and multiply algorithm can be applied to attack discrete logarithm-based ciphers\footnote{Bao, Feng, et al. "Breaking public key cryptosystems on tamper resistant devices in the presence of transient faults." Security Protocols: 5th International Workshop Paris, France, April 7–9, 1997 Proceedings 5. Springer Berlin Heidelberg, 1998.}.
+        \end{itemize}
+    \end{itemize}
+\end{frame}

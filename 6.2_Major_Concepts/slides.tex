@@ -1,0 +1,58 @@
+\begin{frame}{Introduction}
+    \begin{itemize}
+        \item Cryptography is an indispensable tool used to protect the information in computing systems
+        \item Cryptographic algorithms in use nowadays are considered secure in theory.
+        \item But in the real world, these algorithms are implemented on physical devices in the form of integrated circuits.
+        \item These circuits have their physical properties, such as power consumption dependent on the processed data, emanation of electromagnetic waves, and susceptibility to computational errors due to environmental influences.
+        \item To evaluate the security level of cryptographic implementations, it is necessary to include the physical security assessment.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Cryptography}
+    \begin{itemize}
+        \item Classical ciphers, e.g. shift cipher
+        \item Modern ciphers: DES, AES, PRESENT
+        \item Implementation of symmetric block ciphers - T-tables for AES, combining sBoxLayer and pLayer for PRESENT
+        \item RSA, RSA signatures
+        \item Implementation of RSA - square and multiply algorithm, Blakely's method
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Fault attacks and countermeasures}
+    \begin{itemize}
+        \item Fault attacks on symmetric block ciphers - differential fault analysis, diagonal fault attack on AES
+        \item Countermeasures against fault attacks on symmetric block ciphers - encoding-based countermeasure
+        \item Fault attacks on RSA and RSA signatures - safe error attack
+        \item Countermeasures against fault attacks on RSA and RSA signatures - a simple change of multiplicand and multiplier against safe error attack
+        \item Fault injection techniques vary greatly in their effectiveness and cost
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Experimental Aspects of Side-Chanel Analysis}
+    \begin{itemize}
+        \item Power consumption side-channel leakages come from the switching power in CMOS-based circuits
+        \item Power analysis attacks utilizes osciloscope for capturing the traces
+        \item The captured power consumption, or so-called leakage, is dependent on both operation and data in the DUT
+        \item Leakage assessment can be used to assess the a cryptographic implementation’s security to determine if it leaks information through side channels.
+        \item SNR computations can help to identify the point-of-interest for our attack
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Simple and Differential Power Analysis}
+    \begin{itemize}
+        \item SPA on RSA - targets square and multiply algorithm
+        \item Countermeasure against SPA on RSA - square and multiply-always algorithm
+        \item DPA on symmetric block ciphers - attack on PRESENT
+        \item Profiled DPA on symmetric block ciphers - first identify POI
+        \item Countermeasures against DPA on symmetric block ciphers - masking for PRESENT
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Other hardware attack techniques}
+    \begin{itemize}
+        \item Timing attacks exploit variations in execution time or other timing-related behaviors to infer sensitive information
+        \item Cache attacks exploit timing variations and access patterns in a computer's cache memory to extract sensitive information
+        \item Hardware Trojans are malicious modifications introduced into electronic circuits during design or manufacturing that can alter functionality or compromise security, often leading to vulnerabilities or failures in critical systems.
+        \item Cold boot attacks exploit the remanence effect of RAM to recover unencrypted data from RAM. 
+    \end{itemize}
+\end{frame}
